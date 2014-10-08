@@ -67,9 +67,10 @@ test.err = double(ntry)
 
 
 
-
-fit <- randomForest(count ~ season + holiday + workingday + weather + temp + atemp + humidity + windspeed + hour + dow + daypart, data=train, ntree = 700, importance=TRUE)
 #fit
+#fit <- randomForest(count ~ season + holiday + workingday + weather + temp + atemp + humidity + windspeed + hour + dow + daypart, data=train, ntree = 700, importance=TRUE)
+fit <- ctree(count ~ season + holiday + workingday + weather + temp + atemp + humidity + windspeed + hour + dow + daypart, data=train)
+
 plot(fit)
 
 Prediction <- predict(fit, test)
