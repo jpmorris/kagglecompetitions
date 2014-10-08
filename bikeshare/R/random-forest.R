@@ -1,11 +1,11 @@
-setwd("/home/jmorris/workspace/kagglecompetitions/bikeshare")
+setwd("/home/jmorris/workspace/kagglecompetitions/bikeshare/R")
 
 
 train <- read.csv('train.csv')
 test <-read.csv('test.csv')
 
-install.packages("lubridate")
-install.packages("randomForest")
+#install.packages("lubridate")
+#install.packages("randomForest")
 library(lubridate)
 library(randomForest)
 
@@ -17,7 +17,24 @@ test$dow <- wday(test$datetime)
 
 test$count<-0
 
-fit <- randomForest(as.factor(count) ~ season + holiday + weather + dow + hour + temp + atemp + humidity + windspeed, data=train, ntree = 700, importance=TRUE)
+ntry = 9
+obb.err = double(ntry)
+test.err = double(ntry)
+
+for(mtry in 1:ntry){
+        fit <- randomForest(count ~ season + holiday + weather + dow + hour + temp + atemp + humidity + windspeed, data=train, ntree = 400, mtry = mtry)
+        obb.err[mtry] = fit$mse[400]
+        pred = predict(fit,test)
+        test.err[mtry] = with(train, mean((count-pred)^2))
+        cat(mtry, " ")
+}
+matplot(1:mtry, cbind(test.err, oob.err), pch=19,col=c("red","blue"),type="b",ylab="Mean Squared Error")
+
+
+
+
+fit <- randomForest(count ~ season + holiday + weather + dow + hour + temp + atemp + humidity + windspeed, data=train, ntree = 700, importance=TRUE)
+#fit
 plot(fit)
 
 Prediction <- predict(fit, test)
