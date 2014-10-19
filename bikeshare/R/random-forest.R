@@ -9,6 +9,9 @@ test <-read.csv('test.csv')
 library(lubridate)
 library(randomForest)
 library(party)
+library(gbm)
+library(ISLR)
+library(boot)
 
 
 # ADDITIONAL FEATURES
@@ -46,16 +49,26 @@ train$dow <- factor(train$dow)
 test$dow <- factor(test$dow)
 train$daypart <- factor(train$daypart)
 test$daypart <- factor(test$daypart)
-
-
-
 test$count<-0
 
-ntry = 9
-obb.err = double(ntry)
-test.err = double(ntry)
+
+# VALIDATION
+# Holdout validation
+library(caTools)
+split <- sample.split(train$count, SplitRatio = 0.7)
+partialtrain <- subset(train, split==TRUE)
+holdoutvalidation <- subset(train, split==FALSE)
+
+# Cross validation
+
+
+
+
 
 # MSE v.s. forest mtry
+#ntry = 9
+#obb.err = double(ntry)
+#test.err = double(ntry)
 #for(mtry in 1:ntry){
 #        fit <- randomForest(count ~ season + holiday + weather + dow + hour + temp + atemp + humidity + windspeed, data=train, ntree = 400, mtry = mtry)
 #        obb.err[mtry] = fit$mse[400]
@@ -68,12 +81,27 @@ test.err = double(ntry)
 
 
 #fit
+# random forest
 #fit <- randomForest(count ~ season + holiday + workingday + weather + temp + atemp + humidity + windspeed + hour + dow + daypart, data=train, ntree = 700, importance=TRUE)
+# conditional inference trees
 fit <- ctree(count ~ season + holiday + workingday + weather + temp + atemp + humidity + windspeed + hour + dow + daypart, data=train)
+# boosting
+fit <- gbm(count ~ season + holiday + workingday + weather + temp + atemp + humidity + windspeed + hour + dow + daypart, data=train, distribution="gaussian", n.trees=10000, shrinkage=0.01, interaction.depth=4)
+
+
 
 plot(fit)
 
 Prediction <- predict(fit, test)
+
+# boosting predict - this wont work with a test dataset without count values (need to crossvalidate)
+n.trees=seq(from=100, to=10000,by=100)
+Prediction <- predict(fit, test, n.trees=n.trees)
+dim(Prediction)
+berr = with(test, apply((Prediction - count)^2, 2, mean))
+plot(n.trees, berr, pch = 19, ylab = "Mean Squared Error", xlab = "# Trees", 
+     main = "Boosting Test Error")
+
 plot(Prediction)
 submit <- data.frame(datetime = test$datetime, count = Prediction)
 write.csv(submit, file = "random-forest.csv", row.names = FALSE)

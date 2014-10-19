@@ -1,0 +1,2 @@
+# ShowOfHands support functions
+
