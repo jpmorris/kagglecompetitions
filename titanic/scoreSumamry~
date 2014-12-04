@@ -1,0 +1,9 @@
+
+
+
+
+
+0.77990 - genderclassbasedmodel.csv - gender, class, fare, category model provided by kaggle
+0.77033 - 77033logisticWithImputation.R - imputation of ages and logistic regression
+	found here: http://vimeo.com/69269984
+0.76555 - genderbasedmodel.csv - gender based model provided by kaggle
