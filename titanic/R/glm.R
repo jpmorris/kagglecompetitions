@@ -7,7 +7,7 @@ age.model=lm(age~fare+sibsp+parch,data=train)
 train[is.na(train$age),]$age=predict(age.model,newdata=train[is.na(train$age),])
 
 
-model = glm(survived ~ pclass + fare + sibsp +parch+sex+age + pclass:sex + age:sex , family = binomial(link="logit"))
+model = glm(survived ~ pclass + sex + age + sibsp+ parch+sibsp:parch+fare+embarked + sex +  pclass:sex + age:sex , family = binomial(link="logit"))
 
 p= predict(model,newdata=train,type="response")
 p.survived=round(p)
