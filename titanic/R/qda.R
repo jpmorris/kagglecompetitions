@@ -7,13 +7,14 @@ age.model=lm(age~fare+sibsp+parch,data=train)
 train[is.na(train$age),]$age=predict(age.model,newdata=train[is.na(train$age),])
 
 
-model = glm(survived ~ pclass + sex + age + sibsp+ parch+sibsp:parch+fare+embarked + sex +  pclass:sex + age:sex , family = binomial(link="logit"))
 
-p= predict(model,newdata=train,type="response")
-p.survived=round(p)
+model = qda(survived ~ pclass + sex + age + sibsp+ parch+fare+sibsp:parch +pclass:sex + age:sex , data=train )
+
+p.survived= predict(model,newdata=train)$class
+
 
 require(caret)
-print(confusionMatrix(p.survived,survived))
+print(confusionMatrix(p.survived,train$survived))
 
 test=read.csv("test.csv")
 names(test)<-tolower(names(test))
@@ -25,6 +26,6 @@ test[is.na(test$age),]$age=predict(age.model,newdata=test[is.na(test$age),])
 
 test$fare[153]=mean(with(test,subset(fare,pclass==3)),na.rm=TRUE)
 
-p.survive=round(predict(model,newdata=test, type="response"))
+p.survive=predict(model,newdata=test)$class
 data=data.frame(PassengerId=test$passengerid,survived=p.survive)
-write.csv(data,"submission-glm.csv",row.names=FALSE)
+write.csv(data,"submission-qda.csv",row.names=FALSE)
